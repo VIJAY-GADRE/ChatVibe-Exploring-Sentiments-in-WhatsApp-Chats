@@ -7,28 +7,28 @@ def preprocess(data):
     :return: a pandas dataframe
     '''
     regex_pattern = '\d{1,2}/\d{1,2}/\d{2,4},\s\d{1,2}:\d{2}\s-\s'
-    messages = re.split(regex_pattern, data)[1:]
+    msgs = re.split(regex_pattern, data)[1:]
     dates = re.findall(regex_pattern, data)
 
-    dataframe = pd.DataFrame({'user_message': messages, 'message_date': dates})
+    dataframe = pd.DataFrame({'user_message': msgs, 'message_date': dates})
     try:
         dataframe['message_date'] = pd.to_datetime(dataframe['message_date'], format='%d/%m/%y, %H:%M - ')
     except:
         dataframe['message_date'] = pd.to_datetime(dataframe['message_date'], format='%m/%d/%y, %H:%M - ')
     dataframe.rename(columns={'message_date': 'date'}, inplace=True)
 
-    users, messages = [], []
-    for message in dataframe['user_message']:
-        entry = re.split('([\w\W]+?):\s', message)
+    users, msgs = [], []
+    for msg in dataframe['user_message']:
+        entry = re.split('([\w\W]+?):\s', msg)
         if entry[1:]:
             users.append(entry[1])                       # Username
-            messages.append(" ".join(entry[2:]))         # Message
+            msgs.append(" ".join(entry[2:]))             # Message
         else:
             users.append('group_notification')
-            messages.append(entry[0])
+            msgs.append(entry[0])
 
     dataframe['user'] = users
-    dataframe['message'] = messages
+    dataframe['msg'] = msgs
 
     dataframe.drop(columns=['user_message'], inplace=True)
     dataframe['only_date'] = dataframe['date'].dt.date

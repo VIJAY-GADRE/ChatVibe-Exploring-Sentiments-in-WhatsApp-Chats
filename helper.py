@@ -46,7 +46,7 @@ def activity_heatmap(selected_user, data, sentiment):
         data = data[data['user'] == selected_user]
     data = data[data['value'] == sentiment]
 
-    user_heatmap = data.pivot_table(index='day_name', columns='period', values='message', aggfunc='count').fillna(0)
+    user_heatmap = data.pivot_table(index='day_name', columns='period', values='msg', aggfunc='count').fillna(0)
     return user_heatmap
 
 def daily_timeline(selected_user, data, sentiment):
@@ -59,8 +59,8 @@ def daily_timeline(selected_user, data, sentiment):
     if selected_user != 'Overall':
         data = data[data['user'] == selected_user]
     data = data[data['value'] == sentiment]
-    # count of message on a specific date
-    daily_timeline = data.groupby('only_date').count()['message'].reset_index()
+    # count of msg on a specific date
+    daily_timeline = data.groupby('only_date').count()['msg'].reset_index()
     return daily_timeline
 
 def monthly_timeline(selected_user, data, sentiment):
@@ -73,7 +73,7 @@ def monthly_timeline(selected_user, data, sentiment):
     if selected_user != 'Overall':
         data = data[data['user'] == selected_user]
     data = data[data['value'] == -sentiment]
-    timeline = data.groupby(['year', 'month_num', 'month']).count()['message'].reset_index()
+    timeline = data.groupby(['year', 'month_num', 'month']).count()['msg'].reset_index()
     time = []
     for i in range(timeline.shape[0]):
         time.append(timeline['month'][i] + "-" + str(timeline['year'][i]))
@@ -105,21 +105,21 @@ def create_wordcloud(selected_user, data, sentiment):
         data = data[data['user'] == selected_user]
 
     temp = data[data['user'] != 'group_notification']
-    temp = temp[temp['message'] != '<Media omitted>\n']
+    temp = temp[temp['msg'] != '<Media omitted>\n']
 
     # Remove stop words -> "stop_hinglish.txt"
-    def remove_stop_words(message):
+    def remove_stop_words(msg):
         y = []
-        for word in message.lower().split():
+        for word in msg.lower().split():
             if word not in stop_words:
                 y.append(word)
         return " ".join(y)
 
     wc = WordCloud(width=500, height=500, min_font_size=10, background_color='white')
-    temp['message'] = temp['message'].apply(remove_stop_words)
-    temp['message'] = temp['message'][temp['value'] == sentiment]
+    temp['msg'] = temp['msg'].apply(remove_stop_words)
+    temp['msg'] = temp['msg'][temp['value'] == sentiment]
 
-    df_wc = wc.generate(temp['message'].str.cat(sep=" "))
+    df_wc = wc.generate(temp['msg'].str.cat(sep=" "))
     return df_wc
 
 def most_common_words(selected_user, data, sentiment):
@@ -134,10 +134,10 @@ def most_common_words(selected_user, data, sentiment):
     if selected_user != 'Overall':
         data = data[data['user'] == selected_user]
     temp = data[data['user'] != 'group_notification']
-    temp = temp[temp['message'] != '<Media omitted>\n']
+    temp = temp[temp['msg'] != '<Media omitted>\n']
     words = []
-    for message in temp['message'][temp['value'] == sentiment]:
-        for word in message.lower().split():
+    for msg in temp['msg'][temp['value'] == sentiment]:
+        for word in msg.lower().split():
             if word not in stop_words:
                 words.append(word)
 
